@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notion Spotify-Style Widget</title>
+  <title>Reproductor de Audio</title>
   <style>
     :root {
-      /* Colores adaptables al tema claro/oscuro de Notion */
       --bg-color: #f2f4f7;
       --text-main: #1e293b;
       --text-sub: #64748b;
@@ -39,7 +38,7 @@
       padding: 10px;
     }
 
-    .spotify-widget {
+    .audio-player {
       position: relative;
       width: 100%;
       max-width: 520px;
@@ -89,7 +88,6 @@
       height: 120px;
     }
 
-    /* Encabezado del widget */
     .widget-header {
       display: flex;
       align-items: center;
@@ -102,7 +100,7 @@
     .widget-header svg {
       width: 16px;
       height: 16px;
-      fill: #1db954; /* Verde Spotify */
+      fill: #1db954;
     }
 
     .playlist-title {
@@ -111,12 +109,6 @@
       text-overflow: ellipsis;
     }
 
-    .chevron {
-      font-size: 0.75rem;
-      margin-left: 2px;
-    }
-
-    /* Información de la canción */
     .song-info {
       margin: 4px 0;
     }
@@ -141,7 +133,6 @@
       margin-top: 2px;
     }
 
-    /* Controles inferiores */
     .widget-controls {
       display: flex;
       align-items: center;
@@ -169,7 +160,6 @@
       fill: currentColor;
     }
 
-    /* Botón Me Gusta (Heart) */
     .btn-heart svg {
       width: 20px;
       height: 20px;
@@ -183,7 +173,6 @@
       stroke: #1db954;
     }
 
-    /* Portada derecha */
     .widget-right {
       flex-shrink: 0;
     }
@@ -196,172 +185,144 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
-    /* Player oculto de YouTube */
-    #yt-hidden {
-      position: absolute;
-      width: 0;
-      height: 0;
-      opacity: 0;
-      pointer-events: none;
+    #audio {
+      display: none;
     }
   </style>
 </head>
 <body>
-
-  <div class="spotify-widget">
+  <div class="audio-player">
     <a class="back-link" href="index.html" title="Volver a la portada" aria-label="Volver a la portada">←</a>
-    <!-- LADO IZQUIERDO: Encabezado, Título, Artista y Controles -->
+
     <div class="widget-left">
       <div class="widget-header">
-        <!-- Logo Spotify estilo SVG -->
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.563.387-.857.207-2.35-1.434-5.308-1.758-8.793-.963-.335.077-.67-.133-.746-.467-.077-.334.132-.67.467-.746 3.808-.87 7.076-.496 9.722 1.115.293.18.386.563.207.854zm1.23-2.737c-.226.367-.706.482-1.072.257-2.687-1.652-6.785-2.131-9.965-1.166-.413.126-.848-.106-.973-.519-.125-.413.106-.848.519-.973 3.632-1.102 8.147-.568 11.234 1.328.366.226.48.707.257 1.073zm.145-2.852c-3.223-1.914-8.54-2.09-11.618-1.156-.5.152-1.026-.13-1.178-.63-.151-.5.13-1.026.63-1.178 3.537-1.073 9.404-.863 13.116 1.34.444.264.59.842.327 1.287-.264.443-.84.59-1.277.337z"/></svg>
-        <span class="playlist-title" id="playlist-title">Spotify · playlist name here</span>
-        <span class="chevron">∧</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        <span class="playlist-title" id="playlist-title">My playlist <3</span>
       </div>
 
       <div class="song-info">
-        <div class="song-title" id="song-title">Song title here</div>
-        <div class="song-artist" id="song-artist">Artist Name here</div>
+        <div class="song-title" id="song-title">Título de la canción</div>
+        <div class="song-artist" id="song-artist">Artista</div>
       </div>
 
       <div class="widget-controls">
-        <!-- Corazón -->
-        <button class="btn-icon btn-heart" id="heart-btn" title="Me gusta">
-          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </button>
-        <!-- Anterior -->
-        <button class="btn-icon" id="prev-btn" title="Anterior">
+        <button class="btn-icon" id="prev-btn" title="Anterior" aria-label="Anterior">
           <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
         </button>
-        <!-- Play / Pausa -->
-        <button class="btn-icon" id="play-btn" title="Reproducir / Pausa">
+        <button class="btn-icon" id="play-btn" title="Reproducir / Pausa" aria-label="Reproducir o pausar">
           <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <!-- Siguiente -->
-        <button class="btn-icon" id="next-btn" title="Siguiente">
+        <button class="btn-icon" id="next-btn" title="Siguiente" aria-label="Siguiente">
           <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
         </button>
       </div>
     </div>
 
-    <!-- LADO DERECHO: Portada de la canción -->
     <div class="widget-right">
-      <img id="album-cover" class="album-cover" src="https://via.placeholder.com/150" alt="Cover Art">
+      <img id="album-cover" class="album-cover" src="https://i.pinimg.com/736x/25/b2/07/25b2072b5de8c7bdab176683fd33622d.jpg" alt="Portada de la canción">
     </div>
   </div>
 
-  <div id="yt-hidden"></div>
+  <audio id="audio" preload="metadata"></audio>
 
   <script>
-    const youtubeTracks = [
+    const tracks = [
       {
-        url: "https://music.youtube.com/watch?v=D-aR3y6k3qI",
-        title: "NIGHTS LIKE THIS",
-        artist: "d4vd",
-        cover: "https://img.youtube.com/vi/D-aR3y6k3qI/hqdefault.jpg"
+        src: "https://www.dropbox.com/scl/fi/REEMPLAZA_ESTE_ID/BreatheMe.mp3?raw=1",
+        title: "Bring Me To Life",
+        artist: "Evanescence",
+        cover: "https://i.pinimg.com/736x/25/b2/07/25b2072b5de8c7bdab176683fd33622d.jpg"
       },
       {
-        url: "https://music.youtube.com/watch?v=4O4p328i3aM",
+        src: "https://www.dropbox.com/scl/fi/REEMPLAZA_ESTE_ID/I-Smoked-Away-My-Brain.mp3?raw=1",
         title: "I Smoked Away My Brain",
         artist: "A$AP Rocky",
-        cover: "https://img.youtube.com/vi/4O4p328i3aM/hqdefault.jpg"
+        cover: "https://i.pinimg.com/736x/25/b2/07/25b2072b5de8c7bdab176683fd33622d.jpg"
       },
       {
-        url: "https://www.youtube.com/watch?v=F6zg1aG_j-E",
+        src: "https://www.dropbox.com/scl/fi/REEMPLAZA_ESTE_ID/Fashion-Killa.mp3?raw=1",
         title: "Fashion Killa",
         artist: "A$AP Rocky",
-        cover: "https://img.youtube.com/vi/F6zg1aG_j-E/hqdefault.jpg"
+        cover: "https://i.pinimg.com/736x/25/b2/07/25b2072b5de8c7bdab176683fd33622d.jpg"
       }
     ];
 
-    // Extrae el ID del video
-    function getID(url) {
-      const reg = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const m = url.match(reg);
-      return (m && m[2].length === 11) ? m[2] : url;
-    }
-
-    let tracks = youtubeTracks.map(track => ({
-      id: getID(track.url),
-      title: track.title,
-      artist: track.artist,
-      cover: track.cover
-    }));
-
-    let currentIndex = 0;
-    let player;
-    let isPlaying = false;
-
-    // Cargar API de YouTube IFrame
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('yt-hidden', {
-        height: '0',
-        width: '0',
-        videoId: tracks[0].id,
-        events: {
-          'onReady': () => {
-            loadTrack(0, false);
-          },
-          'onStateChange': onStateChange
-        }
-      });
-    }
-
-    function loadTrack(index, autoPlay = true) {
-      currentIndex = index;
-      updateUI();
-      player.cueVideoById(tracks[currentIndex].id);
-      if (autoPlay) player.playVideo();
-    }
-
-    function updateUI() {
-      const current = tracks[currentIndex];
-      document.getElementById('song-title').textContent = current.title;
-      document.getElementById('song-artist').textContent = current.artist;
-      document.getElementById('album-cover').src = current.cover;
-    }
-
-    // Controles
-    const playBtn = document.getElementById('play-btn');
+    const audio = document.getElementById('audio');
     const playIcon = document.getElementById('play-icon');
-    const heartBtn = document.getElementById('heart-btn');
-
+    const playBtn = document.getElementById('play-btn');
+    const songTitle = document.getElementById('song-title');
+    const songArtist = document.getElementById('song-artist');
+    const albumCover = document.getElementById('album-cover');
     const PLAY_SVG = '<path d="M8 5v14l11-7z"/>';
     const PAUSE_SVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
 
+    let currentIndex = 0;
+
+    function normalizeDropboxUrl(url) {
+      try {
+        const parsedUrl = new URL(url, window.location.href);
+        if (parsedUrl.hostname.includes('dropbox.com')) {
+          parsedUrl.searchParams.set('raw', '1');
+          parsedUrl.searchParams.delete('dl');
+        }
+        return parsedUrl.toString();
+      } catch {
+        return url;
+      }
+    }
+
+    function updateUI() {
+      const currentTrack = tracks[currentIndex];
+      songTitle.textContent = currentTrack.title;
+      songArtist.textContent = currentTrack.artist;
+      albumCover.src = currentTrack.cover;
+      audio.src = normalizeDropboxUrl(currentTrack.src);
+    }
+
+    function setTrack(index, autoPlay = true) {
+      currentIndex = index;
+      updateUI();
+      audio.load();
+      if (autoPlay) {
+        audio.play().catch(() => {});
+      }
+    }
+
     playBtn.onclick = () => {
-      isPlaying ? player.pauseVideo() : player.playVideo();
+      if (!audio.src) {
+        setTrack(currentIndex, false);
+      }
+
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
     };
 
     document.getElementById('next-btn').onclick = () => {
-      let nextIndex = (currentIndex + 1) % tracks.length;
-      loadTrack(nextIndex, true);
+      const nextIndex = (currentIndex + 1) % tracks.length;
+      setTrack(nextIndex, true);
     };
 
     document.getElementById('prev-btn').onclick = () => {
-      let prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-      loadTrack(prevIndex, true);
+      const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+      setTrack(prevIndex, true);
     };
 
-    heartBtn.onclick = () => {
-      heartBtn.classList.toggle('liked');
-    };
+    audio.addEventListener('play', () => {
+      playIcon.innerHTML = PAUSE_SVG;
+    });
 
-    function onStateChange(event) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        isPlaying = true;
-        playIcon.innerHTML = PAUSE_SVG;
-      } else if (event.data === YT.PlayerState.PAUSED) {
-        isPlaying = false;
-        playIcon.innerHTML = PLAY_SVG;
-      } else if (event.data === YT.PlayerState.ENDED) {
-        document.getElementById('next-btn').click();
-      }
-    }
+    audio.addEventListener('pause', () => {
+      playIcon.innerHTML = PLAY_SVG;
+    });
+
+    audio.addEventListener('ended', () => {
+      document.getElementById('next-btn').click();
+    });
+
+    setTrack(0, false);
   </script>
 </body>
 </html>
