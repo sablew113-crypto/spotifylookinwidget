@@ -33,6 +33,7 @@
     }
 
     .player-card {
+      position: relative;
       width: 100%;
       max-width: 420px;
       background-color: var(--card-bg);
@@ -40,6 +41,31 @@
       padding: 20px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .page-link {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-sub);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      line-height: 1;
+      transition: transform 0.2s, background-color 0.2s, color 0.2s;
+    }
+
+    .page-link:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
     }
 
     .header {
@@ -227,6 +253,7 @@
 <body>
 
   <div class="player-card">
+    <a class="page-link" href="page2.html" title="Ir a la segunda página" aria-label="Ir a la segunda página">→</a>
     <div class="header">
       <!-- Portada de la Playlist -->
       <img id="cover-art" class="cover-img" src="https://i.pinimg.com/736x/c9/08/24/c9082476680d98807138965df1398cf8.jpg" alt="tumblr divas rise cover">
