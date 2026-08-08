@@ -1,0 +1,2 @@
+# spotifylookinwidget
+Spotify playlist template
