@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notion Audio Playlist</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: #181818;
+      --card-hover: #282828;
+      --text-main: #ffffff;
+      --text-sub: #b3b3b3;
+      --accent-color: #1db954; /* Color verde estilo Spotify */
+      --accent-hover: #1ed760;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 12px;
+      min-height: 100vh;
+    }
+
+    .player-card {
+      width: 100%;
+      max-width: 420px;
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .header {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .cover-img {
+      width: 110px;
+      height: 110px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    .playlist-details h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .playlist-details p {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .play-btn-main {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: var(--accent-color);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .play-btn-main:hover {
+      transform: scale(1.05);
+      background-color: var(--accent-hover);
+    }
+
+    .play-btn-main svg {
+      width: 22px;
+      height: 22px;
+      fill: #000;
+    }
+
+    .now-playing-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .now-playing-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .now-playing-artist {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Barra de progreso */
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .time-stamp {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      min-width: 32px;
+    }
+
+    .seek-slider {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #4d4d4d;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .seek-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    /* Tracklist */
+    .tracklist {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .tracklist::-webkit-scrollbar {
+      width: 6px;
+    }
+    .tracklist::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 3px;
+    }
+
+    .track-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .track-item:hover {
+      background-color: var(--card-hover);
+    }
+
+    .track-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .track-item.active .track-title {
+      color: var(--accent-color);
+    }
+
+    .track-num {
+      width: 24px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .track-meta {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .track-title {
+      font-size: 0.88rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-artist {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player-card">
+    <div class="header">
+      <!-- Portada de la Playlist -->
+      <img id="cover-art" class="cover-img" src="https://i.pinimg.com/736x/c9/08/24/c9082476680d98807138965df1398cf8.jpg" alt="tumblr divas rise cover">
+      <div class="playlist-details">
+        <h2 id="playlist-name">Playlist name here <3</h2>
+        <p>linalovesclouds</p>
+        <p id="playlist-stats" style="margin-top: 4px; font-size: 0.75rem;">3 canciones</p>
+      </div>
+    </div>
+
+    <div class="controls-bar">
+      <button class="play-btn-main" id="play-btn" title="Reproducir / Pausa">
+        <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+
+      <div class="now-playing-info">
+        <div class="now-playing-title" id="now-title">Selecciona una canción</div>
+        <div class="now-playing-artist" id="now-artist">-</div>
+      </div>
+    </div>
+
+    <div class="progress-container">
+      <span class="time-stamp" id="current-time">0:00</span>
+      <input type="range" class="seek-slider" id="seek-slider" value="0" max="100">
+      <span class="time-stamp" id="duration">0:00</span>
+    </div>
+
+    <div class="tracklist" id="tracklist"></div>
+  </div>
+
+  <audio id="audio"></audio>
+
+  <script>
+    // 🎵 EDITA AQUÍ TUS CANCIONES (URLs directas a archivos MP3/AAC)
+    const playlist = [
+      {
+        title: "Join me in death",
+        artist: "HIM",
+        src: "https://www.dropbox.com/scl/fi/ccr7re9250p3l68wbauni/Join-Me-In-Death-1.mp3?rlkey=rmdlkutmfg4g7zcc8dg55vsdf&raw=1"
+      },
+      {
+        title: "Right Here In My Arms",
+        artist: "HIM",
+        src: "https://www.dropbox.com/scl/fi/tpwwbwbjqq9iqkb0fqrr4/Right-Here-In-My-Arms.mp3?rlkey=xkr70m7fql6blrjtvj5z5l5ov&st=3rhtsu14&raw=1"
+      },
+      {
+        title: "Sextape",
+        artist: "deaftones",
+        src: "https://www.dropbox.com/scl/fi/9lltxkl3gbpyswnicsopf/Sextape.mp3?rlkey=ees0diqm1dv5lmyoc23hhhfky&st=d5ep9rod&raw=1"
+      }
+      
+    ];
+
+    let currentIndex = 0;
+    let isPlaying = false;
+
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('play-btn');
+    const playIcon = document.getElementById('play-icon');
+    const nowTitle = document.getElementById('now-title');
+    const nowArtist = document.getElementById('now-artist');
+    const currentTimeEl = document.getElementById('current-time');
+    const durationEl = document.getElementById('duration');
+    const seekSlider = document.getElementById('seek-slider');
+    const tracklistEl = document.getElementById('tracklist');
+
+    const PLAY_SVG = '<path d="M8 5v14l11-7z"/>';
+    const PAUSE_SVG = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+    function renderTracklist() {
+      tracklistEl.innerHTML = '';
+      playlist.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.className = `track-item ${index === currentIndex ? 'active' : ''}`;
+        item.onclick = () => loadAndPlayTrack(index);
+
+        item.innerHTML = `
+          <div class="track-num">${index + 1}</div>
+          <div class="track-meta">
+            <div class="track-title">${track.title}</div>
+            <div class="track-artist">${track.artist}</div>
+          </div>
+        `;
+        tracklistEl.appendChild(item);
+      });
+    }
+
+    function loadTrack(index) {
+      currentIndex = index;
+      const track = playlist[currentIndex];
+      audio.src = track.src;
+      nowTitle.textContent = track.title;
+      nowArtist.textContent = track.artist;
+      renderTracklist();
+    }
+
+    function playAudio() {
+      audio.play().then(() => {
+        isPlaying = true;
+        playIcon.innerHTML = PAUSE_SVG;
+      }).catch(err => console.log('Error de reproducción:', err));
+    }
+
+    function pauseAudio() {
+      audio.pause();
+      isPlaying = false;
+      playIcon.innerHTML = PLAY_SVG;
+    }
+
+    function loadAndPlayTrack(index) {
+      loadTrack(index);
+      playAudio();
+    }
+
+    playBtn.onclick = () => {
+      if (!audio.src) loadTrack(0);
+      isPlaying ? pauseAudio() : playAudio();
+    };
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        seekSlider.value = progress;
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+      }
+    });
+
+    seekSlider.addEventListener('input', () => {
+      if (audio.duration) {
+        audio.currentTime = (seekSlider.value / 100) * audio.duration;
+      }
+    });
+
+    audio.addEventListener('ended', () => {
+      if (currentIndex < playlist.length - 1) {
+        loadAndPlayTrack(currentIndex + 1);
+      } else {
+        pauseAudio();
+      }
+    });
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    loadTrack(0);
+  </script>
+</body>
+</html>
